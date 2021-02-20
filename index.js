@@ -4,6 +4,7 @@ const server = require("http").Server(app);
 const { v4: uuidv4 } = require("uuid");
 const io = require("socket.io")(server);
 const mongoose = require('mongoose');
+const bodyParser = require('body-parser');
 const { ExpressPeerServer } = require('peer');
 const peerServer = ExpressPeerServer(server, {
   debug: true
@@ -16,6 +17,10 @@ const Room = require('./models/room.model');
 app.set("view engine", "ejs");
 app.use(express.static("public"));
 
+//body paser
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
 //connect mongodb
 mongoose.connect(
   'mongodb+srv://admin:e2HQbjsiUAvimGc@cluster0.8jo3b.mongodb.net/java07-video-call?retryWrites=true&w=majority',
@@ -26,10 +31,17 @@ mongoose.connect(
 
 app.use('/peerjs', peerServer);
 
-app.get("/", (req, rsp) => {
+app.get("/", (req, res) => {
+  let roomId = uuidv4();
+
+  // res.redirect(`/${roomId}`);
+  res.render('index', { roomId: roomId })
+});
+
+app.post('/room', (req, res) => {
   //id owner test, will be updated after finish login
   let owner = mongoose.Types.ObjectId().toHexString()
-  let roomId = uuidv4();
+  let roomId = req.body.roomId;
   let room = {
     roomId: roomId,
     owner: owner,
@@ -37,9 +49,20 @@ app.get("/", (req, rsp) => {
   }
 
   Room.insertMany(room)
-
-  rsp.redirect(`/${roomId}`);
+  res.send(roomId)
 });
+
+app.post('/join', async (req, res) => {
+  let roomId = req.body.roomId;
+  let room = await Room.findOne({'roomId': roomId}, (err, docs) => {
+    if (err) throw err;
+  });
+  if (room) {
+    res.send({roomId: roomId, exist: true})
+  } else {
+    res.send({roomId: roomId, exist: false})
+  }
+})
 
 app.get("/:room", async (req, res) => {
   let roomId = req.params.room;
@@ -67,4 +90,6 @@ io.on('connection', socket => {
   });
 });
 
-server.listen(process.env.PORT || 3030);
+server.listen(process.env.PORT || 3030, () => {
+  console.log('Server is listening')
+});
