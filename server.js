@@ -17,6 +17,10 @@ app.get("/", (req, rsp) => {
   rsp.redirect(`/${uuidv4()}`);
 });
 
+app.get("/thank-you", (req, res) => {
+  res.render("thankPage");
+});
+
 app.get("/:room", (req, res) => {
   res.render("room", { roomId: req.params.room });
 });
@@ -28,6 +32,10 @@ io.on('connection', socket => {
 
     socket.on('message', (message, userId) => {
       io.to(roomId).emit('createMessage', message = { content: message, user: userId });
+    });
+
+    socket.on("disconnect", () => {
+      socket.to(roomId).broadcast.emit("user-disconnected", userId);
     });
   });
 });
