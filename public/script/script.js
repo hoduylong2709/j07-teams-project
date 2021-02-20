@@ -11,6 +11,7 @@ var peer = new Peer(undefined, {
 
 let myVideoStream;
 let currentUserId;
+let peers = {};
 
 var getUserMedia =
   navigator.getUserMedia ||
@@ -32,11 +33,17 @@ navigator.mediaDevices
 
       call.on("stream", (userVideoStream) => {
         addVideoStream(video, userVideoStream);
+        console.log(peers);
       });
     });
 
     socket.on("user-connected", (userId) => {
       connectToNewUser(userId, stream);
+    });
+
+    socket.on("user-disconnected", (userId) => {
+      if (peers[userId]) peers[userId].close();
+      console.log(`User ${userId} left`);
     });
 
     let text = $('input');
@@ -79,13 +86,20 @@ peer.on("open", (id) => {
   currentUserId = id;
 });
 
+socket.on("disconnect", () => {
+  socket.emit("leave-room", ROOM_ID, currentUserId);
+});
+
 const connectToNewUser = (userId, streams) => {
   var call = peer.call(userId, streams);
-  console.log(call);
   var video = document.createElement("video");
   call.on("stream", (userVideoStream) => {
     addVideoStream(video, userVideoStream);
   });
+  call.on("close", () => {
+    video.remove();
+  });
+  peers[userId] = call;
 };
 
 const addVideoStream = (videoEl, stream, uId = "") => {
@@ -155,5 +169,9 @@ const setPlayVideo = () => {
     <span>Play Video</span>
   `
   document.querySelector('.main__video_button').innerHTML = html;
+}
+
+const leaveMeeting = () => {
+  window.location.href = '/thank-you';
 }
 
