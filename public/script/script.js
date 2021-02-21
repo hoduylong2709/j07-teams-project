@@ -10,6 +10,8 @@ var peer = new Peer(undefined, {
 });
 
 let myVideoStream;
+let currentUserId;
+let peers = {};
 
 var getUserMedia =
   navigator.getUserMedia ||
@@ -23,7 +25,7 @@ navigator.mediaDevices
   })
   .then((stream) => {
     myVideoStream = stream;
-    addVideoStream(myVideo, stream);
+    addVideoStream(myVideo, stream, "me");
 
     peer.on("call", (call) => {
       call.answer(stream);
@@ -31,6 +33,7 @@ navigator.mediaDevices
 
       call.on("stream", (userVideoStream) => {
         addVideoStream(video, userVideoStream);
+        console.log(peers);
       });
     });
 
@@ -38,18 +41,26 @@ navigator.mediaDevices
       connectToNewUser(userId, stream);
     });
 
+    socket.on("user-disconnected", (userId) => {
+      if (peers[userId]) peers[userId].close();
+      console.log(`User ${userId} left`);
+    });
+
     let text = $('input');
 
     $('html').keydown((e) => {
       if (e.which == 13 && text.val().length !== 0) {
-        socket.emit('message', text.val());
+        socket.emit('message', text.val(), currentUserId);
         text.val('');
       }
     });
 
     socket.on('createMessage', message => {
-      console.log('This is coming from the server', message);
-      $('.messages').append(`<li class="message"><b>USER</b><br/>${message}</li>`);
+      if (message.user != currentUserId) {
+        $('.messages').append(`<li class="message other-user"><b>${message.user.substring(0, 8)}</b><br/>${message.content}</li>`);
+      } else {
+        $('.messages').append(`<li class="message me"><b>ME</b><br/>${message.content}</li>`);
+      }
       scrollToBottom();
     });
   });
@@ -72,20 +83,28 @@ peer.on("call", function (call) {
 
 peer.on("open", (id) => {
   socket.emit("join-room", ROOM_ID, id);
+  currentUserId = id;
+});
+
+socket.on("disconnect", () => {
+  socket.emit("leave-room", ROOM_ID, currentUserId);
 });
 
 const connectToNewUser = (userId, streams) => {
   var call = peer.call(userId, streams);
-  console.log(call);
   var video = document.createElement("video");
   call.on("stream", (userVideoStream) => {
-    console.log(userVideoStream);
     addVideoStream(video, userVideoStream);
   });
+  call.on("close", () => {
+    video.remove();
+  });
+  peers[userId] = call;
 };
 
-const addVideoStream = (videoEl, stream) => {
+const addVideoStream = (videoEl, stream, uId = "") => {
   videoEl.srcObject = stream;
+  videoEl.id = uId;
   videoEl.addEventListener("loadedmetadata", () => {
     videoEl.play();
   });
@@ -150,5 +169,9 @@ const setPlayVideo = () => {
     <span>Play Video</span>
   `
   document.querySelector('.main__video_button').innerHTML = html;
+}
+
+const leaveMeeting = () => {
+  window.location.href = '/thank-you';
 }
 

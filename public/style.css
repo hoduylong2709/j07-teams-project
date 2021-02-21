@@ -104,6 +104,9 @@ video {
 .messages {
   color: white;
   list-style: none;
+  display: block;
+  padding: 0 21px;
+  font-size: 15px;
 }
 
 ::-webkit-scrollbar {
@@ -112,4 +115,9 @@ video {
 
 .unmute {
   color: #cc3b33;
+}
+
+li {
+  border-bottom: 1px solid #3d3d42;
+  margin: 5px 0px;
 }

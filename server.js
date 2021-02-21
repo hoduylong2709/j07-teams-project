@@ -67,7 +67,12 @@ app.post('/join', async (req, res) => {
 app.get("/:room", async (req, res) => {
   let roomId = req.params.room;
   res.render("room", { roomId: roomId });
+})
+
+app.get("/thank-you", (req, res) => {
+  res.render("thankPage");
 });
+
 
 io.on('connection', socket => {
   socket.on('join-room', (roomId, userId) => {
@@ -84,12 +89,14 @@ io.on('connection', socket => {
     socket.join(roomId);
     socket.to(roomId).broadcast.emit('user-connected', userId);
 
-    socket.on('message', message => {
-      io.to(roomId).emit('createMessage', message);
+    socket.on('message', (message, userId) => {
+      io.to(roomId).emit('createMessage', message = { content: message, user: userId });
+    });
+
+    socket.on("disconnect", () => {
+      socket.to(roomId).broadcast.emit("user-disconnected", userId);
     });
   });
 });
 
-server.listen(process.env.PORT || 3030, () => {
-  console.log('Server is listening')
-});
+server.listen(process.env.PORT || 3030)
