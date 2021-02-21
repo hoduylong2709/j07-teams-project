@@ -172,6 +172,6 @@ const setPlayVideo = () => {
 }
 
 const leaveMeeting = () => {
-  window.location.href = '/thank-you';
+  window.location.href = '/page/thank-you';
 }
 
