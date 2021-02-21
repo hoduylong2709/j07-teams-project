@@ -69,7 +69,7 @@ app.get("/:room", async (req, res) => {
   res.render("room", { roomId: roomId });
 })
 
-app.get("/thank-you", (req, res) => {
+app.get("/page/thank-you", (req, res) => {
   res.render("thankPage");
 });
 
