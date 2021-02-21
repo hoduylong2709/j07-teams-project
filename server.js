@@ -66,8 +66,15 @@ app.post('/join', async (req, res) => {
 
 app.get("/:room", async (req, res) => {
   let roomId = req.params.room;
-  res.render("room", { roomId: roomId });
-})
+  let room = await Room.findOne({'roomId' : roomId}, (err, docs) => {
+    if (err) throw err
+  })
+
+  if (room) {
+    res.render("room", { roomId: roomId });
+  } else {
+    res.redirect('/')
+  }})
 
 app.get("/page/thank-you", (req, res) => {
   res.render("thankPage");
