@@ -121,3 +121,8 @@ li {
   border-bottom: 1px solid #3d3d42;
   margin: 5px 0px;
 }
+
+html,
+body {
+  height: 100vh;
+}
