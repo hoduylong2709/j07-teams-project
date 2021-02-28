@@ -3,15 +3,26 @@ body {
   padding: 0;
 }
 
+#input-room-id {
+  margin-right: 10px;
+}
+
 #video-grid {
   display: flex;
   justify-content: center;
+  height: 100%;
+  width: 100%;
+  align-items: center;
+  flex-wrap: wrap;
+  overflow-y: auto;
 }
 
 video {
-  height: 300px;
-  width: 400px;
+  display: block;
+  flex: 1;
   object-fit: cover;
+  border: 5px solid #000;
+  max-width: 600px;
 }
 
 .main {
@@ -27,6 +38,10 @@ video {
 
 .main__right {
   flex: 0.2;
+  display: flex;
+  flex-direction: column;
+  background-color: #242324;
+  border-left: 1px solid #3d3d42;
 }
 
 .main__videos {

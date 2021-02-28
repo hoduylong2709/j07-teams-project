@@ -110,6 +110,13 @@ const addVideoStream = (videoEl, stream, uId = "") => {
   });
 
   videoGrid.append(videoEl);
+
+  let numberOfUsers = document.getElementsByTagName("video").length;
+  if (numberOfUsers > 1) {
+    for (let i = 0; i < numberOfUsers; i++) {
+      document.getElementsByTagName("video")[i].style.width = 100 / numberOfUsers + "%";
+    }
+  }
 };
 
 const scrollToBottom = () => {
