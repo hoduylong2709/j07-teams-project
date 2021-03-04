@@ -38,6 +38,35 @@ app.get("/", (req, res) => {
   res.render('index', { roomId: roomId })
 });
 
+app.get('/login', (req, res, next) => {
+  res.render('login')
+})
+
+app.post('/login', async (req, res, next) => {
+  let {email, password} = req.body
+  let errors = []
+  
+  let user = await User.findOne({'email': email}, (err, docs) => {
+    if (err) throw err
+  })
+
+  console.log(user)
+
+  if (!user) {
+    errors.push("User does not exist")
+    res.render('login', {errors: errors})
+    return
+  }
+
+  if (password != user.password) {
+    errors.push("Wrong password")
+    res.render('login', {errors: errors})
+    return
+  }
+
+  res.redirect('/')
+})
+
 app.post('/room', (req, res) => {
   //id owner test, will be updated after finish login
   let owner = mongoose.Types.ObjectId().toHexString()
