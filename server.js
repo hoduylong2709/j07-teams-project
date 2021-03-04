@@ -6,6 +6,7 @@ const io = require("socket.io")(server);
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const { ExpressPeerServer } = require('peer');
+const cookieParser = require('cookie-parser');
 const peerServer = ExpressPeerServer(server, {
   debug: true
 });
@@ -16,6 +17,10 @@ const Room = require('./models/room.model');
 
 app.set("view engine", "ejs");
 app.use(express.static("public"));
+
+
+// cookie 
+app.use(cookieParser('java07'))
 
 //body paser
 app.use(bodyParser.json());
@@ -32,6 +37,10 @@ mongoose.connect(
 app.use('/peerjs', peerServer);
 
 app.get("/", (req, res) => {
+  if (!req.signedCookies.userId) {
+    res.redirect('/login');
+    return
+  } 
   let roomId = uuidv4();
 
   // res.redirect(`/${roomId}`);
@@ -39,7 +48,11 @@ app.get("/", (req, res) => {
 });
 
 app.get('/login', (req, res, next) => {
-  res.render('login')
+  if (req.signedCookies.userId) {
+    res.redirect('/');
+    return
+  } 
+  res.render('login', {errors: []})
 })
 
 app.post('/login', async (req, res, next) => {
@@ -49,8 +62,6 @@ app.post('/login', async (req, res, next) => {
   let user = await User.findOne({'email': email}, (err, docs) => {
     if (err) throw err
   })
-
-  console.log(user)
 
   if (!user) {
     errors.push("User does not exist")
@@ -64,6 +75,7 @@ app.post('/login', async (req, res, next) => {
     return
   }
 
+  res.cookie('userId', user._id, { signed: true })
   res.redirect('/')
 })
 
@@ -94,6 +106,11 @@ app.post('/join', async (req, res) => {
 })
 
 app.get("/:room", async (req, res) => {
+  if (!req.signedCookies.userId) {
+    res.redirect('/login');
+    return
+  } 
+
   let roomId = req.params.room;
   let room = await Room.findOne({'roomId' : roomId}, (err, docs) => {
     if (err) throw err
