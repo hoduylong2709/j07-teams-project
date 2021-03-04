@@ -45,6 +45,13 @@
                 </div>
               </div>
             </div>
+            <% if (errors !== null) {%>
+              <% for (let error of errors) {%>
+                <div class="alert alert-primary" role="alert">
+                  <%=error%>
+                </div>
+              <% }%>
+            <% }%>
           </div>
         </div>
       </div>
