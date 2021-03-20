@@ -75,8 +75,16 @@ app.post('/login', async (req, res, next) => {
     return
   }
 
+  res.locals.user = user
+
+
   res.cookie('userId', user._id, { signed: true })
   res.redirect('/')
+})
+
+app.post('/logout', (req, res, next) => {
+  res.clearCookie('userId')
+  res.redirect('/login')
 })
 
 app.post('/room', (req, res) => {
@@ -123,6 +131,11 @@ app.get("/:room", async (req, res) => {
   }})
 
 app.get("/page/thank-you", (req, res) => {
+  if (!req.signedCookies.userId) {
+    res.redirect('/login');
+    return
+  } 
+
   res.render("thankPage");
 });
 
@@ -152,4 +165,4 @@ io.on('connection', socket => {
   });
 });
 
-server.listen(process.env.PORT || 3030)
+server.listen(process.env.PORT || 3031)
