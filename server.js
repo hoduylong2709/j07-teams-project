@@ -29,9 +29,9 @@ app.use(bodyParser.urlencoded({ extended: true }));
 //connect mongodb
 mongoose.connect(
   'mongodb+srv://admin:e2HQbjsiUAvimGc@cluster0.8jo3b.mongodb.net/java07-video-call?retryWrites=true&w=majority',
-   { useNewUrlParser: true, useUnifiedTopology: true },
-    () => {
-      console.log('Mongodb connected');
+  { useNewUrlParser: true, useUnifiedTopology: true },
+  () => {
+    console.log('Mongodb connected');
   })
 
 app.use('/peerjs', peerServer);
@@ -40,7 +40,7 @@ app.get("/", (req, res) => {
   if (!req.signedCookies.userId) {
     res.redirect('/login');
     return
-  } 
+  }
   let roomId = uuidv4();
 
   // res.redirect(`/${roomId}`);
@@ -51,27 +51,27 @@ app.get('/login', (req, res, next) => {
   if (req.signedCookies.userId) {
     res.redirect('/');
     return
-  } 
-  res.render('login', {errors: []})
+  }
+  res.render('login', { errors: [] })
 })
 
 app.post('/login', async (req, res, next) => {
-  let {email, password} = req.body
+  let { email, password } = req.body
   let errors = []
-  
-  let user = await User.findOne({'email': email}, (err, docs) => {
+
+  let user = await User.findOne({ 'email': email }, (err, docs) => {
     if (err) throw err
   })
 
   if (!user) {
     errors.push("User does not exist")
-    res.render('login', {errors: errors})
+    res.render('login', { errors: errors })
     return
   }
 
   if (password != user.password) {
     errors.push("Wrong password")
-    res.render('login', {errors: errors})
+    res.render('login', { errors: errors })
     return
   }
 
@@ -95,24 +95,30 @@ app.post('/room', (req, res) => {
 
 app.post('/join', async (req, res) => {
   let roomId = req.body.roomId;
-  let room = await Room.findOne({'roomId': roomId}, (err, docs) => {
+  let room = await Room.findOne({ 'roomId': roomId }, (err, docs) => {
     if (err) throw err;
   });
   if (room) {
-    res.send({roomId: roomId, exist: true})
+    res.send({ roomId: roomId, exist: true })
   } else {
-    res.send({roomId: roomId, exist: false})
+    res.send({ roomId: roomId, exist: false })
   }
 })
+
+app.post('/logout', (req, res, next) => {
+  res.clearCookie('userId');
+  res.clearCookie('io');
+  res.redirect('/login');
+});
 
 app.get("/:room", async (req, res) => {
   if (!req.signedCookies.userId) {
     res.redirect('/login');
     return
-  } 
+  }
 
   let roomId = req.params.room;
-  let room = await Room.findOne({'roomId' : roomId}, (err, docs) => {
+  let room = await Room.findOne({ 'roomId': roomId }, (err, docs) => {
     if (err) throw err
   })
 
@@ -120,7 +126,8 @@ app.get("/:room", async (req, res) => {
     res.render("room", { roomId: roomId });
   } else {
     res.redirect('/')
-  }})
+  }
+})
 
 app.get("/page/thank-you", (req, res) => {
   res.render("thankPage");
@@ -132,8 +139,8 @@ io.on('connection', socket => {
     ////id guest test, will be updated after finish login
     let guest = mongoose.Types.ObjectId().toHexString()
     Room.updateOne(
-      {'roomId': roomId},
-      {'$push': {'guests': guest}},
+      { 'roomId': roomId },
+      { '$push': { 'guests': guest } },
       (err, docs) => {
         if (err) throw err
       }
