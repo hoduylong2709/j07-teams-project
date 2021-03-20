@@ -28,6 +28,19 @@
     </script>
   </head>
   <body>
+    <div class="popup-wrapper">
+      <div class="popup">
+        <div class="popup-close">x</div>
+        <div class="popup-content">
+          <h5>Copy and send room id to your friends</h5>
+          <input type="text" id="room-link" />
+          <button type="button" class="btn btn-secondary" id="copy-btn">
+            copy
+          </button>
+        </div>
+      </div>
+    </div>
+
     <div class="main">
       <div class="main__left">
         <div class="main__videos">
@@ -55,7 +68,7 @@
               <i class="fa fa-shield"></i>
               <span>Security</span>
             </div>
-            <div class="main__controls__button">
+            <div class="main__controls__button" id="invite-button">
               <i class="fa fa-users"></i>
               <span>Participants</span>
             </div>

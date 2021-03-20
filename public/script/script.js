@@ -6,7 +6,7 @@ myVideo.muted = true;
 var peer = new Peer(undefined, {
   path: "/peerjs",
   host: "/",
-  port: "443",
+  port: "3030",
 });
 
 let myVideoStream;
@@ -181,4 +181,31 @@ const setPlayVideo = () => {
 const leaveMeeting = () => {
   window.location.href = '/page/thank-you';
 }
+
+const inviteButton = document.querySelector('#invite-button');
+const popup = document.querySelector('.popup-wrapper');
+const close = document.querySelector('.popup-close');
+const roomLink = document.querySelector('#room-link');
+const copyButton = document.querySelector('#copy-btn');
+
+inviteButton.addEventListener('click', () => {
+  roomLink.value = ROOM_ID;
+  popup.style.display = 'block';
+});
+
+close.addEventListener('click', () => {
+  popup.style.display = 'none';
+});
+
+popup.addEventListener('click', e => {
+  popup.style.display = 'none';
+});
+
+copyButton.addEventListener('click', () => {
+  const copyText = document.getElementById('room-link');
+  copyText.select();
+  document.execCommand("copy");
+  alert("Copied: " + copyText.value);
+});
+
 
