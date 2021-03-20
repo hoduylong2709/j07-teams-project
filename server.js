@@ -75,9 +75,6 @@ app.post('/login', async (req, res, next) => {
     return
   }
 
-  res.locals.user = user
-
-
   res.cookie('userId', user._id, { signed: true })
   res.redirect('/')
 })
